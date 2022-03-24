@@ -32,12 +32,12 @@ bool autoMode = false; //default val
 uint32_t t1;
 int udl=90;
 int marshSpeed = 210;
-unsigned long timeout=0;
+unsigned long timeout=20;
 Servo servo1; 
 float mean = 90;
 bool RADIO = true;
 
-unsigned int localUdpPort = 4210;  // local port to listen on
+unsigned int localUdpPort = 4410;  // local port to listen on
 int incomingPacketLength = 40;
 char incomingPacket[40];  // buffer for incoming packets
 
@@ -149,16 +149,16 @@ void loop(){
     if(RADIO){
         timeout = pulseIn(MODE,HIGH,TIMEOUT);
     }//venter TIMEOUT = 20000 microseconds =20 ms to wait for the pulse to be completed: the function returns 0 if no complete pulse was received within the timeout
-    // Serial.print("------------------------------------------------------------------------>");  
-        // Serial.print("timeout: ");
-        // Serial.println(timeout);
-        // Serial.print(udl);
-        // Serial.print(" , ");
-        // Serial.print(map(pulseIn(ROR_MAN,HIGH),955,2040,45,135));
-        // Serial.print(" , ");
-        // Serial.print(map(pulseIn(FART,HIGH),1002,2004,-200,200));
-        // Serial.print(" , ");
-        // Serial.println(pulseIn(MODE,HIGH)>1500);
+    Serial.print("------------------------------------------------------------------------>");  
+        Serial.print("timeout: ");
+        Serial.println(timeout);
+        Serial.print(udl);
+        Serial.print(" , ");
+        Serial.print(map(pulseIn(ROR_MAN,HIGH),955,2040,45,135));
+        Serial.print(" , ");
+        Serial.print(map(pulseIn(FART,HIGH),1002,2004,-200,200));
+        Serial.print(" , ");
+        Serial.println(pulseIn(MODE,HIGH)>1500);
         
         if(timeout < 10 ){// ikke tændt for fjernbetjening, da der ikke er registreret en pulseIn fra fjernbetjeningen
             //udl = pulseIn(ROR_AUTO,HIGH)/10 + 45 ;
