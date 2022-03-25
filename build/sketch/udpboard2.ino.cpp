@@ -37,7 +37,10 @@ Servo servo1;
 float mean = 90;
 bool RADIO = true;
 
-unsigned int localUdpPort = 4410;  // local port to listen on
+unsigned int localUdpPort = 4110;  // local port to listen on - SKIB1
+// unsigned int localUdpPort = 4210;  // local port to listen on - SKIB2
+// unsigned int localUdpPort = 4310;  // local port to listen on - SKIB3
+// unsigned int localUdpPort = 4410;  // local port to listen on - SKIB4
 int incomingPacketLength = 40;
 char incomingPacket[40];  // buffer for incoming packets
 
@@ -46,15 +49,15 @@ char incomingPacket[40];  // buffer for incoming packets
 /* initialiserer moduler */
 WiFiUDP Udp;
 
-#line 47 "c:\\Users\\marti\\Documents\\Arduino\\udpboard2\\udpboard2.ino"
+#line 50 "c:\\Users\\marti\\Documents\\Arduino\\udpboard2\\udpboard2.ino"
 void setup();
-#line 114 "c:\\Users\\marti\\Documents\\Arduino\\udpboard2\\udpboard2.ino"
+#line 117 "c:\\Users\\marti\\Documents\\Arduino\\udpboard2\\udpboard2.ino"
 void loop();
-#line 196 "c:\\Users\\marti\\Documents\\Arduino\\udpboard2\\udpboard2.ino"
+#line 200 "c:\\Users\\marti\\Documents\\Arduino\\udpboard2\\udpboard2.ino"
 bool sleep(int t);
-#line 206 "c:\\Users\\marti\\Documents\\Arduino\\udpboard2\\udpboard2.ino"
-float process(char *dat, int len);
-#line 47 "c:\\Users\\marti\\Documents\\Arduino\\udpboard2\\udpboard2.ino"
+#line 210 "c:\\Users\\marti\\Documents\\Arduino\\udpboard2\\udpboard2.ino"
+void process(char *dat, int len);
+#line 50 "c:\\Users\\marti\\Documents\\Arduino\\udpboard2\\udpboard2.ino"
 void setup(){  
     // int * test_ptr = new int(42); //Opretter en pointer til en int = 42 på heapen
     // delete test_ptr; //deallokerer pointeren manulelt
@@ -135,9 +138,10 @@ void loop(){
         {
         incomingPacket[len] = '\0';
         }
-        Serial.printf("UDP packet contents: %s, %d\n", incomingPacket,len);
+        // Serial.printf("UDP packet contents: %s, %d\n", incomingPacket,len);
 
-        udl = process(incomingPacket, len);
+        // udl = process(incomingPacket, len);
+        process(incomingPacket, len);
         // // send back a reply, to the IP address and port we got the packet from
         // Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
         // Udp.write(replyPacket);
@@ -149,28 +153,28 @@ void loop(){
     if(RADIO){
         timeout = pulseIn(MODE,HIGH,TIMEOUT);
     }//venter TIMEOUT = 20000 microseconds =20 ms to wait for the pulse to be completed: the function returns 0 if no complete pulse was received within the timeout
-    Serial.print("------------------------------------------------------------------------>");  
-        Serial.print("timeout: ");
-        Serial.println(timeout);
-        Serial.print(udl);
-        Serial.print(" , ");
-        Serial.print(map(pulseIn(ROR_MAN,HIGH),955,2040,45,135));
-        Serial.print(" , ");
-        Serial.print(map(pulseIn(FART,HIGH),1002,2004,-200,200));
-        Serial.print(" , ");
-        Serial.println(pulseIn(MODE,HIGH)>1500);
+    // Serial.print("------------------------------------------------------------------------>");  
+        // Serial.print("timeout: ");
+        // Serial.println(timeout);
+        // Serial.print(udl);
+        // Serial.print(" , ");
+        // Serial.print(map(pulseIn(ROR_MAN,HIGH),955,2040,45,135));
+        // Serial.print(" , ");
+        // Serial.print(map(pulseIn(FART,HIGH),1002,2004,-200,200));
+        // Serial.print(" , ");
+        // Serial.println(pulseIn(MODE,HIGH)>1500);
         
         if(timeout < 10 ){// ikke tændt for fjernbetjening, da der ikke er registreret en pulseIn fra fjernbetjeningen
             //udl = pulseIn(ROR_AUTO,HIGH)/10 + 45 ;
                 
                 
-                Serial.println(udl);
+                // Serial.println(udl);
                 // client.send(String(udl,1));
                 // servo1.write(udl-15);
 
         }else if(timeout > 1500){// auto mode - da pulseIn(MODE HIGH)= ca. 2000 micro sek = ca. 2 ms (the length of the pulse (in microseconds) or 0 if no pulse is completed before the timeout)
                 // udl = pulseIn(ROR_AUTO,HIGH)/10 + 45;//input fra ROR_AUTO pin
-                Serial.print(" ##############################, ");
+                // Serial.print(" ##############################, ");
                 // Serial.println(udl);
                 servo1.write(udl);
                 if(marshSpeed>0){
@@ -185,8 +189,8 @@ void loop(){
 
             float k = map(pulseIn(ROR_MAN,HIGH),955,2040,45,135);
             float s = map(pulseIn(FART,HIGH),1000,2000,-250,250);
-            Serial.print(" ****************************, ");
-            Serial.println(k);
+            // Serial.print(" ****************************, ");
+            // Serial.println(k);
             mean = 0.7*mean + 0.3*k;
             
             servo1.write(mean-15);
@@ -214,89 +218,24 @@ bool sleep(int t){
     return false;
 }
 
-float process(char *dat, int len)
+void process(char *dat, int len)
 {
-
+    char nr = dat[0];
 	int startBit = 1;
+    switch (nr)
+		{
+		case 'a':
+	        udl = atoi(&dat[startBit]);
+            break;
+        case 'b':
+	        marshSpeed = atoi(&dat[startBit]);
+            break;
 
-	int intVal = atoi(&dat[startBit]);
+        }
+
 	// Serial.printf("process linje 212 %f %i \n", intVal, len);
 
-return intVal;
+// return intVal;
 }
 
-////////////////////// WiFi + websoket2 //////////////////////////
-// bool initConnectToWifi(){
-// 	// ESP8266 Connect to wifi
-//     WiFi.mode(WIFI_STA);
-// 	for (byte j = 0; j < 15; j++) {
-// 	delay(1000);
-		
-// 		WiFi.begin("ESPap","thereisnospoon");
-//         Serial.println("Prøver at forbinde ESP AP");
-
-
-// 		for (int i = 0; i < 10 && WiFi.status() != WL_CONNECTED; i++) 
-// 		{
-//         Serial.print(".");
-// 			delay(1000);
-// 		}
-// 		if (WiFi.status() == WL_CONNECTED) {
-//             // WiFi.setAutoReconnect(false);
-// 	        // WiFi.persistent(false);
-//             Serial.println("Succesfuld forbindelse til WiFi");
-// 			return true;
-// 			}
-// 	}
-// 	// Check if connected to wifi
-// 	if (WiFi.status() != WL_CONNECTED) 
-// 	{
-//         Serial.println("No Wifi!");
-// 		return false;
-// 	}
-// }
-
-// void onMessageCallback(WebsocketsMessage message) 
-// {
-//     String besked = message.data();
-// 	// float misvisning = 0; //
-// 	char nr = besked.charAt(0);
-//     switch (nr)
-//     {
-//     case 'a':
-//         Serial.print("a:");
-//         Serial.println(besked.substring(1, besked.length()).toInt());
-//         udl = besked.substring(1, besked.length()).toInt();
-    
-//         break;
-//     case 'b':
-//         Serial.print("b:");
-//         Serial.println(besked.substring(1, besked.length()).toInt());
-//         marshSpeed = besked.substring(1, besked.length()).toInt();
-//         break;
-//     default:
-//     Serial.print("default:");
-//     Serial.println(message.data());
-//         break;
-//     }
-// }
-// void onEventsCallback(WebsocketsEvent event, String data)
-// {
-//   if (event == WebsocketsEvent::ConnectionOpened)
-//   {
-//     Serial.println("Connnection Opened");
-//   }
-//   else if (event == WebsocketsEvent::ConnectionClosed)
-//   {
-//     Serial.println("Connnection Closed");
-//   }
-//   else if (event == WebsocketsEvent::GotPing)
-//   {
-//     Serial.println("Got a Ping!");
-//   }
-//   else if (event == WebsocketsEvent::GotPong)
-//   {
-//     Serial.println("Got a Pong!");
-//   }
-// }
 

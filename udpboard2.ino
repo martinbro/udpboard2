@@ -127,9 +127,10 @@ void loop(){
         {
         incomingPacket[len] = '\0';
         }
-        Serial.printf("UDP packet contents: %s, %d\n", incomingPacket,len);
+        // Serial.printf("UDP packet contents: %s, %d\n", incomingPacket,len);
 
-        udl = process(incomingPacket, len);
+        // udl = process(incomingPacket, len);
+        process(incomingPacket, len);
         // // send back a reply, to the IP address and port we got the packet from
         // Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
         // Udp.write(replyPacket);
@@ -141,28 +142,28 @@ void loop(){
     if(RADIO){
         timeout = pulseIn(MODE,HIGH,TIMEOUT);
     }//venter TIMEOUT = 20000 microseconds =20 ms to wait for the pulse to be completed: the function returns 0 if no complete pulse was received within the timeout
-    Serial.print("------------------------------------------------------------------------>");  
-        Serial.print("timeout: ");
-        Serial.println(timeout);
-        Serial.print(udl);
-        Serial.print(" , ");
-        Serial.print(map(pulseIn(ROR_MAN,HIGH),955,2040,45,135));
-        Serial.print(" , ");
-        Serial.print(map(pulseIn(FART,HIGH),1002,2004,-200,200));
-        Serial.print(" , ");
-        Serial.println(pulseIn(MODE,HIGH)>1500);
+    // Serial.print("------------------------------------------------------------------------>");  
+        // Serial.print("timeout: ");
+        // Serial.println(timeout);
+        // Serial.print(udl);
+        // Serial.print(" , ");
+        // Serial.print(map(pulseIn(ROR_MAN,HIGH),955,2040,45,135));
+        // Serial.print(" , ");
+        // Serial.print(map(pulseIn(FART,HIGH),1002,2004,-200,200));
+        // Serial.print(" , ");
+        // Serial.println(pulseIn(MODE,HIGH)>1500);
         
         if(timeout < 10 ){// ikke tændt for fjernbetjening, da der ikke er registreret en pulseIn fra fjernbetjeningen
             //udl = pulseIn(ROR_AUTO,HIGH)/10 + 45 ;
                 
                 
-                Serial.println(udl);
+                // Serial.println(udl);
                 // client.send(String(udl,1));
                 // servo1.write(udl-15);
 
         }else if(timeout > 1500){// auto mode - da pulseIn(MODE HIGH)= ca. 2000 micro sek = ca. 2 ms (the length of the pulse (in microseconds) or 0 if no pulse is completed before the timeout)
                 // udl = pulseIn(ROR_AUTO,HIGH)/10 + 45;//input fra ROR_AUTO pin
-                Serial.print(" ##############################, ");
+                // Serial.print(" ##############################, ");
                 // Serial.println(udl);
                 servo1.write(udl);
                 if(marshSpeed>0){
@@ -177,8 +178,8 @@ void loop(){
 
             float k = map(pulseIn(ROR_MAN,HIGH),955,2040,45,135);
             float s = map(pulseIn(FART,HIGH),1000,2000,-250,250);
-            Serial.print(" ****************************, ");
-            Serial.println(k);
+            // Serial.print(" ****************************, ");
+            // Serial.println(k);
             mean = 0.7*mean + 0.3*k;
             
             servo1.write(mean-15);
@@ -206,14 +207,23 @@ bool sleep(int t){
     return false;
 }
 
-float process(char *dat, int len)
+void process(char *dat, int len)
 {
-
+    char nr = dat[0];
 	int startBit = 1;
+    switch (nr)
+		{
+		case 'a':
+	        udl = atoi(&dat[startBit]);
+            break;
+        case 'b':
+	        marshSpeed = atoi(&dat[startBit]);
+            break;
 
-	int intVal = atoi(&dat[startBit]);
+        }
+
 	// Serial.printf("process linje 212 %f %i \n", intVal, len);
 
-return intVal;
+// return intVal;
 }
 
